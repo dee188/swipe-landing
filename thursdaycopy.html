@@ -587,15 +587,14 @@
             <div class="max-w-md mx-auto">
                 <form class="space-y-4" id="waitlist-form">
                     <input 
+                        id="email"
+                        name="email"
                         type="email" 
                         placeholder="Enter your email address"
                         class="w-full px-6 py-4 rounded-full text-lg focus:outline-none focus:ring-4 focus:ring-white/30"
                         required
                     >
-                    <button 
-                        type="submit"
-                        class="w-full bg-white text-[#4A1B5C] px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg"
-                    >
+                    <button type="submit" class="w-full bg-white text-[#4A1B5C] px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg">
                         Join the Waitlist
                     </button>
                 </form>
@@ -695,6 +694,8 @@
         }, observerOptions);
 
         // Observe all animated elements
+
+        // lets see if it changes
         document.addEventListener('DOMContentLoaded', () => {
             const animatedElements = document.querySelectorAll('#community .opacity-0');
             animatedElements.forEach(el => observer.observe(el));
