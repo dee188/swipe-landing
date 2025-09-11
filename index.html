@@ -656,35 +656,67 @@
             });
         });
 
-        // Waitlist form submission
-        document.getElementById("waitlist-form").addEventListener("submit", async function(e) {
+        // --- Cookie Helpers ---
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        function getCookie(name) {
+            const decoded = decodeURIComponent(document.cookie);
+            const cookies = decoded.split(';');
+            name = name + "=";
+            for (let c of cookies) {
+            c = c.trim();
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+            }
+            return "";
+        }
+
+        // --- Waitlist Form Logic ---
+        document.getElementById("waitlist-form").addEventListener("submit", async function (e) {
             e.preventDefault();
-        
-            const email = this.querySelector("input[type='email']").value;
 
-            try {
-                const res = await fetch("/api/subscribe", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email }),
-                });
+            const email = this.querySelector("input[type='email']").value.trim().toLowerCase();
 
-                const data = await res.json();
+            // Check if cookie exists
+            let savedEmails = getCookie("waitlist_emails");
+            let emailList = savedEmails ? savedEmails.split(",") : [];
 
-                if (res.ok) {
-                    alert("✅ " + data.message);
-                } else {
-                    alert("❌ " + (data.error || "Something went wrong! please try again."));
-                }
-
-                this.reset();
+            if (emailList.includes(email)) {
+            alert("⚠️ You’ve already joined the waitlist within the last 30 days.");
+            return; 
             }
 
-            catch (err) {
-                    alert("⚠️ Error: " + err.message);
-                }
-        });
+            try {
+            
+            const res = await fetch("/api/subscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
 
+            const data = await res.json();
+
+            if (res.ok) {
+                alert("✅ " + data.message);
+
+                // Save email to cookie for 30 days
+                emailList.push(email);
+                setCookie("waitlist_emails", emailList.join(","), 30);
+            } else {
+                alert("❌ " + (data.error || "Something went wrong! please try again."));
+            }
+
+            this.reset();
+            } catch (err) {
+            alert("⚠️ Error: " + err.message);
+            }
+        });
         // Intersection Observer for scroll-triggered animations
         const observerOptions = {
             threshold: 0.1,
